@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow"><!-- 지인 배포용: 검색엔진에 노출하지 않음 -->
+<title>슈퍼 대전낙</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DotGothic16&family=Nanum+Gothic+Coding:wght@400;700&family=Press+Start+2P&display=swap">
+<style>
+/* 레이아웃: PC-98 작전 화면 — 위 상태줄, 맵 창(좌) + 정보·명령 창(우, 폰에서는 아래), 통신 로그 */
+:root {
+  --bg: #0a0d1c;
+  --win: #000000;
+  --line: #f4f4f4;
+  --dim: #8a90a8;
+  --blue: #4a7bff;
+  --red: #e8433f;
+  --yellow: #ffd23f;
+  --cyan: #58e0ee;
+  --f-logo: 'Press Start 2P', 'DotGothic16', ui-monospace, monospace;
+  --f-pix: 'DotGothic16', 'Nanum Gothic Coding', ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--line); }
+body {
+  margin: 0; font-family: var(--f-pix); font-size: 15px; line-height: 1.45;
+  padding-block: 12px 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 980px; margin: 0 auto; display: grid; gap: 10px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.logo { font-family: 'Black Han Sans', var(--f-pix); font-size: 20px; letter-spacing: 1px; color: var(--yellow); text-shadow: 2px 2px 0 #7a4a1e; }
+.bar .stat { color: var(--cyan); }
+.bar .sp { flex: 1; }
+.tag { display: inline-block; padding: 0 6px; color: #000; font-weight: 700; }
+.tag.blue { background: var(--blue); } .tag.red { background: var(--red); }
+.layout { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr) 250px; } }
+.win { background: var(--win); border: 4px double var(--line); padding: 8px 10px 10px; min-width: 0; position: relative; }
+.ttl { display: inline-block; background: var(--line); color: #000; padding: 0 8px; margin: -2px 0 6px; font-size: 13px; letter-spacing: 1px; }
+.win p { margin: 2px 0; }
+.dim { color: var(--dim); }
+.mono { white-space: pre; font-family: 'Nanum Gothic Coding', var(--f-pix); font-size: 14px; overflow-x: auto; }
+.screen { padding: 6px; }
+.screen .frame { position: relative; line-height: 0; }
+.scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+#map { width: 100%; min-width: 516px; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: manipulation; cursor: pointer; display: block; }
+.screen .frame.noscan::after { display: none; }
+.screen .frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.16) 2px 3px); }
+.side { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btns button { flex: 1 1 calc(50% - 8px); }
+button {
+  font: inherit; color: var(--line); background: var(--win); border: 2px solid var(--line);
+  padding: 8px 10px; min-height: 42px; cursor: pointer; text-align: left;
+}
+button::before { content: "▶ "; color: var(--dim); }
+button.primary { background: var(--line); color: #000; }
+button.primary::before { color: #000; }
+button:disabled { opacity: .35; cursor: default; }
+button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+#log p { color: var(--cyan); }
+#log p:last-child { color: var(--line); }
+.banner { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.72); line-height: 1.5; }
+.banner .box { background: #000; border: 4px double var(--line); padding: 14px 18px; text-align: center; max-width: 86%; display: grid; gap: 8px; justify-items: center; }
+.banner h2 { margin: 0; font-family: var(--f-logo); font-size: 18px; }
+.banner.blue h2 { color: var(--blue); } .banner.red h2 { color: var(--red); }
+.banner p { margin: 0; white-space: pre-line; text-align: left; max-height: 46vh; overflow-y: auto; }
+.bbtns { display: grid; gap: 8px; width: 100%; max-width: 360px; }
+.bbtns button { text-align: center; }
+.keys { color: var(--dim); font-size: 13px; }
+.btns.tools button { flex: 1 1 calc(33% - 8px); min-height: 38px; padding: 6px 8px; font-size: 14px; }
+.sub { color: var(--dim); font-size: 13px; margin: 8px 0 4px; }
+#mapName, #mapCode { font: inherit; background: #000; color: var(--line); border: 2px solid var(--line); padding: 6px; width: 100%; margin: 4px 0; }
+#mapCode { font-family: 'Nanum Gothic Coding', ui-monospace, monospace; font-size: 12px; }
+.emsg { color: var(--yellow); }
+.cutin { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.55); line-height: 1.4; cursor: pointer; }
+.cutbox { background: #000; border: 4px double var(--line); width: min(94%, 560px); padding: 6px; }
+#cutcv { width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+#cuttxt { margin: 6px 2px 0; color: var(--yellow); font-size: 14px; }
+/* 인트로: 화면 전체를 덮는 PC-98 모니터. 단일 다크 화면(테마와 무관) */
+#intro { position: fixed; inset: 0; z-index: 50; background: #000; display: grid; place-items: center; cursor: pointer; touch-action: manipulation;
+  padding: env(safe-area-inset-top, 0px) max(12px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(12px, env(safe-area-inset-left, 0px)); }
+#intro .ibox { width: min(100%, 960px, calc((100vh - 120px) * 1.6)); display: grid; gap: 12px; }
+#intro .iscreen { position: relative; line-height: 0; border: 4px double #f4f4f4; }
+#introCv { width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; display: block; background: #000; }
+#intro .iscreen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.18) 2px 3px); }
+#intro .iboot { position: absolute; inset: 0; margin: 0; padding: 4% 5%; color: #f4f4f4; font-family: 'DotGothic16', 'Nanum Gothic Coding', ui-monospace, monospace; font-size: clamp(11px, 2.6vw, 20px); line-height: 1.6; white-space: pre-wrap; }
+#intro .icap { margin: 0; min-height: 2.8em; color: #f4f4f4; font-family: 'DotGothic16', 'Nanum Gothic Coding', ui-monospace, monospace; font-size: clamp(14px, 2.6vw, 22px); line-height: 1.4; text-align: center; text-wrap: balance; }
+#intro .icap.press { color: #ffd23f; }
+#intro .iskip { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: max(12px, env(safe-area-inset-right, 0px)); min-height: 36px; padding: 4px 12px; font-size: 13px;
+  background: #000; color: #f4f4f4; border: 2px solid #f4f4f4; }
+#intro .iskip::before { content: ""; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <span class="logo">슈퍼 대전낙</span>
+    <span class="stat" id="turn">TURN 01</span>
+    <span class="tag blue" id="side">청군 지휘 중</span>
+    <span class="sp"></span>
+    <span class="stat" id="cities">도시</span>
+  </header>
+  <main class="layout">
+    <section class="win screen">
+      <div class="frame">
+        <div class="scroll" id="scroll"><canvas id="map" aria-label="작전 지도"></canvas></div>
+        <div class="banner" id="banner" hidden>
+          <div class="box">
+            <h2 id="bTitle">TURN 01</h2>
+            <p id="bText"></p>
+            <div class="bbtns" id="bBtns"></div>
+          </div>
+        </div>
+        <div class="cutin" id="cutin" hidden>
+          <div class="cutbox">
+            <canvas id="cutcv" width="240" height="96" aria-label="전투 장면"></canvas>
+            <p id="cuttxt"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <aside class="side">
+      <div class="win" id="info"></div>
+      <div class="win" id="cmds"></div>
+    </aside>
+  </main>
+  <div class="win" id="log"></div>
+  <p class="keys">조작: 아군 유닛 선택 → 시안 칸 이동 → 명령. 적 유닛을 누르면 이동 범위가 분홍색으로 표시됩니다. 수도(★) 점령 또는 적 전멸 시 승리. 각진 타일은 지상, 모서리를 깎은 타일은 항공 유닛입니다. 아군 빈 도시를 누르면 생산 메뉴가 열립니다(항공기는 수도에서만). 40턴이 지나면 유닛·도시 점수로 판정합니다. 전장의 안개·배경음악·전투 연출은 [설정]에서 바꿉니다. 전투 장면은 눌러서 건너뛸 수 있습니다. 시작 화면의 [맵 에디터]로 직접 맵을 만들 수 있습니다. 시작 화면에서 클래식 모드와 시나리오 모드(실제 국가·병기로 역사 전투 재현)를 고릅니다. 클래식 [캠페인]은 6개 작전을 이어서 진행하며, 살아남은 부대의 경험(타일 왼쪽 위 노란 점: 숙련·정예·영웅)이 다음 작전으로 이어집니다.</p>
+</div>
+<script src="js/data.js"></script>
+<script src="js/pack-ww2.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/intro.js"></script>
+</body>
+</html>
